@@ -2,10 +2,13 @@ package com.challengeLiteralura.literalura.principal;
 
 import com.challengeLiteralura.literalura.model.Datos;
 import com.challengeLiteralura.literalura.model.DatosLibros;
+import com.challengeLiteralura.literalura.model.Libro;
+import com.challengeLiteralura.literalura.repository.LibroRepositorio;
 import com.challengeLiteralura.literalura.service.ConsumoAPI;
 import com.challengeLiteralura.literalura.service.ConvierteDatos;
 
-import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -15,26 +18,31 @@ public class Principal {
     ConsumoAPI consumoAPI = new ConsumoAPI();
     ConvierteDatos conversor = new ConvierteDatos();
     private Scanner leer = new Scanner(System.in);
+    private LibroRepositorio repositorioLibro;
+
+    //Constructores *********
+    public Principal(LibroRepositorio repositorioLibro) {
+        this.repositorioLibro = repositorioLibro;
+    }
+
+    // **********************
 
     public void muestraElMenu() {
 
         var json = consumoAPI.obtenerDatos(URL_BASE);
-        System.out.println("Info de toooodo en json");
-        System.out.println(json);
-
         var datos = conversor.obtenerDatos(json, Datos.class);
-        System.out.println("Info de toooodo en mi Clase DatosLibros");
+        System.out.println("---Info de toooodo en formato DatosLibros---");
         System.out.println(datos);
 
         var opcion = -1;
         while (opcion != 0) {
             var menu = """
                     ******************      MENU      ****************
-                    1 - Buscar Libro por titulo (en la API)
-                    2 - Listar Libros registrados (en la Base de Datos)
-                    3 - Listar Autores registrados (en la Base de Datos)
-                    4 - Listar Autores vivos en un determinado año (en la Base de Datos)
-                    5 - Listar Libros por Idioma (en la Base de Datos)
+                    1 - Buscar Libro por titulo (en la API) y guardarlo en la BD
+                    2 - Listar Libros registrados (de la Base de Datos)
+                    3 - Listar Autores registrados (de la Base de Datos)
+                    4 - Listar Autores vivos en un determinado año (de la Base de Datos)
+                    5 - Listar Libros por Idioma (de la Base de Datos)
                                                       
                     0 - Salir
                     """;
@@ -44,11 +52,12 @@ public class Principal {
 
             switch (opcion) {
                 case 1:
-                    System.out.println("***Ha elegido Buscar Libro por Título***");
-                    buscaLibroPorTitulo();
+                    System.out.println("***Ha elegido Buscar Libro por Título y guardarlo***");
+                    buscarLibroApi();
                     break;
                 case 2:
-                    System.out.println("Listar Libros registrados en la Base de Datos");
+                    System.out.println("***Ha elegido listar Libros registrados en la Base de Datos***");
+                    listarLibrosBd();
                     break;
                 case 3:
                     System.out.println("Listar Autores registrados en la Base de Datos");
@@ -69,17 +78,24 @@ public class Principal {
 
     }
 
-    public void conectaConApiEnGeneral() {
-        var json = consumoAPI.obtenerDatos(URL_BASE);
-        //Tooodos los datos de tooodos los libros
-        //System.out.println(json);
-
-        var datos = conversor.obtenerDatos(json, Datos.class);
-        //Datos especificos de toooodos los libros en la API
-        System.out.println(datos);
+    private void listarLibrosBd() {
+        List<Libro> todosLosLibros = new ArrayList<>();
+        todosLosLibros = repositorioLibro.findAll();
+        todosLosLibros.forEach(System.out::println);
     }
 
-    public void buscaLibroPorTitulo() {
+    //Metodo para buscar un libro en API y persistirlo en la BD
+    private void buscarLibroApi() {
+        DatosLibros datosLibro = getDatosLibro();
+        if (datosLibro == null) {
+            System.out.println("El libro no se encontró o ya está en la BD...");
+        }
+        Libro libro = new Libro(datosLibro);
+        repositorioLibro.save(libro);
+        System.out.println(libro);
+    }
+
+    public DatosLibros getDatosLibro() {
 
         //Busqueda de libros por nombre (o una parte de éste)
         System.out.println("Ingresa el nombre del libro que deseas buscar: ");
@@ -96,11 +112,12 @@ public class Principal {
 
         if(libroBuscado.isPresent()) {
             System.out.println("Libro encontrado!");
-            System.out.println(libroBuscado.get()); //Para traer todos los datos
+            DatosLibros lib1 = libroBuscado.get();
+            return lib1;
         } else {
             System.out.println("Libro no encontrado...");
         }
-
+        return null;
     }
 
 }
