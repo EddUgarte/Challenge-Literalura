@@ -7,10 +7,7 @@ import com.challengeLiteralura.literalura.repository.LibroRepositorio;
 import com.challengeLiteralura.literalura.service.ConsumoAPI;
 import com.challengeLiteralura.literalura.service.ConvierteDatos;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class Principal {
 
@@ -60,13 +57,16 @@ public class Principal {
                     listarLibrosBd();
                     break;
                 case 3:
-                    System.out.println("Listar Autores registrados en la Base de Datos");
+                    System.out.println("***Ha elegido listar Autores registrados en la Base de Datos***");
+                    listarAutoresBd();
                     break;
                 case 4:
-                    System.out.println("Listar Autores vivos en un determinado año");
+                    System.out.println("***Ha elegido listar Autores vivos en un determinado año***");
+                    listarAutoresPorAnio();
                     break;
                 case 5:
                     System.out.println("***Ha elegido listar Libros por Idioma***");
+                    listarAutoresPorIdioma();
                     break;
                 case 0:
                     System.out.println("Cerrando la aplicación...");
@@ -76,6 +76,31 @@ public class Principal {
             }
         }
 
+    }
+
+    private void listarAutoresPorIdioma() {
+        System.out.println("Selecciona el idioma: ");
+        System.out.println("1-Español   2-Inglés   3-Francés");
+        Integer opIdioma = leer.nextInt();
+        leer.nextLine();// absorber salto de linea
+
+    }
+
+    private void listarAutoresPorAnio() {
+        System.out.println("Ingresa el año: ");
+        Integer anioBuscar = leer.nextInt();
+        leer.nextLine();// absorber salto de linea
+
+    }
+
+    private void listarAutoresBd() {
+        List<Libro> todosLosLibros = new ArrayList<>();
+        todosLosLibros = repositorioLibro.findAll();
+        Set<Libro> librosSinRepetir = new HashSet<>(todosLosLibros);
+        System.out.println("Listando todos los Autores de la BD: ");
+        for (Libro aux : librosSinRepetir) {
+            System.out.println("Autor: " + aux.getAutorNombre());
+        }
     }
 
     private void listarLibrosBd() {
