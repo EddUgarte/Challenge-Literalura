@@ -80,17 +80,30 @@ public class Principal {
 
     private void listarAutoresPorIdioma() {
         System.out.println("Selecciona el idioma: ");
-        System.out.println("1-Español   2-Inglés   3-Francés");
-        Integer opIdioma = leer.nextInt();
-        leer.nextLine();// absorber salto de linea
-
+        System.out.println("es-Español   en-Inglés");
+        String opIdioma = leer.nextLine();
+        List<Libro> librosPorIdioma = repositorioLibro.encuentraPorIdioma(opIdioma);
+        if(!librosPorIdioma.isEmpty()) {
+            System.out.println("Los libros para el idioma seleccionado son: ");
+            librosPorIdioma.forEach(System.out::println);
+        } else {
+            System.out.println("No se encotraron libros para el idioma seleccionado");
+        }
     }
 
     private void listarAutoresPorAnio() {
         System.out.println("Ingresa el año: ");
         Integer anioBuscar = leer.nextInt();
         leer.nextLine();// absorber salto de linea
-
+        List<Libro> librosPorAutorVivo = repositorioLibro.encuentraAutoresPorAnio(anioBuscar);
+        if(librosPorAutorVivo.isEmpty()) {
+            System.out.println("No se encontraron Autores vivos en ese año");
+        } else {
+            System.out.println("Los Autores vivos en el año " + anioBuscar + " son: ");
+            for (Libro aux : librosPorAutorVivo) {
+                System.out.println(aux.getAutorNombre() + " --> " + aux.getAutorFechaNacimiento() + " - " + aux.getAutorFechaFallecimiento());
+            }
+        }
     }
 
     private void listarAutoresBd() {
@@ -112,12 +125,14 @@ public class Principal {
     //Metodo para buscar un libro en API y persistirlo en la BD
     private void buscarLibroApi() {
         DatosLibros datosLibro = getDatosLibro();
-        if (datosLibro == null) {
-            System.out.println("El libro no se encontró o ya está en la BD...");
+        if (datosLibro != null) {
+            Libro libro = new Libro(datosLibro);
+            repositorioLibro.save(libro);
+            System.out.println("Se ha guardado correctamente en la BD");
+            System.out.println(libro);
+        } else {
+            System.out.println("Intente con otro titulo...");
         }
-        Libro libro = new Libro(datosLibro);
-        repositorioLibro.save(libro);
-        System.out.println(libro);
     }
 
     public DatosLibros getDatosLibro() {
